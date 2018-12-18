@@ -78,6 +78,12 @@ let args = optimist
     describe: 'The url prefix to respond on.',
     default: ''
   })
+  .options('tls', {
+    alias: 'tls',
+    boolean: true,
+    describe: 'Use TLS for connections.',
+    default: false
+  })
   .options('nosave', {
     alias: 'ns',
     boolean: true,
@@ -209,6 +215,9 @@ myUtils.getConfig(function (err, config) {
         "password": args['redis-password'] || '',
         "connectionName": "redis-commander"
       };
+      if (args.tls) {
+        newDefault.tls = {};
+      }
 
       if (!myUtils.containsConnection(config.default_connections, newDefault)) {
         if (newDefault.sentinel_host) {
@@ -217,6 +226,7 @@ myUtils.getConfig(function (err, config) {
             sentinels: [{host: newDefault.sentinel_host, port: newDefault.sentinel_port}],
             password: newDefault.password,
             name: 'mymaster',
+            tls: newDefault.tls,
             connectionName: newDefault.connectionName
           });
         } else {
@@ -226,6 +236,7 @@ myUtils.getConfig(function (err, config) {
             family: 4,
             password: newDefault.password,
             db: newDefault.dbIndex,
+            tls: newDefault.tls,
             connectionName: newDefault.connectionName
           });
         }
@@ -273,6 +284,7 @@ function startDefaultConnections (connections, callback) {
           family: 4,
           password: connection.password,
           db: connection.dbIndex,
+          tls: connection.tls,
           connectionName: "redis-commander"
         });
         client.label = connection.label;
